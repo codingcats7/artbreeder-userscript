@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Art Breeder UI Edits
 // @namespace    http://tampermonkey.net/
-// @version      2
+// @version      2.1
 // @description  Art Breeder UI Edits, July 2021
 // @author       codingcats
 // @include      *artbreeder.com*
@@ -52,7 +52,7 @@
         // Profile Page
         editProfilePage(); // shows New instead of Starred
         // Gene Creation Page
-        editGeneCreationPage(); // shows negative image options
+        editGeneCreationPage(); // shows negative image options, adds labels to layer slider
         // Image Page
         editImagePageChildrenTab() // Children tab
         editImagePageCrossbreedTab() // Crossbreed tab - expands content and style sliders
@@ -76,6 +76,16 @@
             let negImg = document.querySelector("#negative-images");
             if (negImg) {
                 negImg.classList.remove("hidden");
+            }
+
+            let geneLayerSlider = document.querySelector('#wlatent-slider');
+            if(geneLayerSlider) {
+                let sliderThumbs = geneLayerSlider.querySelectorAll('.noUi-handle');
+                geneLayerSlider.addEventListener('mousemove', () => {
+                    [...sliderThumbs].forEach((sliderThumb) => {
+                        sliderThumb.innerHTML = Math.round(sliderThumb.ariaValueNow)
+                    })
+                })
             }
         }
 
