@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Art Breeder UI Edits
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  Art Breeder UI Edits, July 2021
 // @author       codingcats
 // @include      *artbreeder.com*
@@ -35,11 +35,12 @@
     //right click on notifications to re-run edits
     document.querySelector(".notifications").addEventListener("contextmenu", runEdits);
 
+    //add your own CSS below
     const styles = `
         body {
             background: #999999;
         }
-        `;
+    `;
 
     let styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
@@ -47,8 +48,6 @@
 
     function runEdits() {
 
-        // Gene Containers everywhere
-        editGeneContainers();
         // Profile Page
         editProfilePage(); // shows New instead of Starred
         // Gene Creation Page
@@ -56,13 +55,17 @@
         // Image Page
         editImagePageChildrenTab() // Children tab
         editImagePageCrossbreedTab() // Crossbreed tab - expands content and style sliders
-        // Select Image Modal
+        //Animation Page
+        editAnimationPage()
+
+        // Selecting Images
         editSelectImageModalButton() // adds an "Enter" button to submit URL input
         editSelectImageModalStyle() // makes more space / resizes stuff
-        // Select Gene Modal
-        editGeneModalArrangement(); // makes more compact
+        // Selecting Genes
+        editGenePreviewArrangement(); // makes more compact
         editGeneModalGeneHiding() // hide unwanted genes
-
+        // Gene Containers
+        editGeneContainers();
 
         function editProfilePage() {
             let profileUsername = document.querySelector(".profile_username");
@@ -79,7 +82,7 @@
             }
 
             let geneLayerSlider = document.querySelector('#wlatent-slider');
-            if(geneLayerSlider) {
+            if (geneLayerSlider) {
                 let sliderThumbs = geneLayerSlider.querySelectorAll('.noUi-handle');
                 geneLayerSlider.addEventListener('mousemove', () => {
                     [...sliderThumbs].forEach((sliderThumb) => {
@@ -105,6 +108,36 @@
                 enableInputTypeToggle(slider, xbreed_range);
                 enableExpandSliderRange(slider)
             });
+        }
+
+        function editAnimationPage() {
+            if (!document.URL.includes("video")) {
+                return
+            }
+            const styles = `
+                #preview .images img{
+                    width: 50vh;
+                    max-width: 60vw;
+                    height: auto;
+                }
+                .flex_column {
+                    padding: 0;
+                }
+                .flex_row {
+                    flex-wrap: nowrap;
+                }
+                #timeline_container {
+                    margin-top: 10px;
+                    position: absolute;
+                }
+               
+            `;
+
+            let styleElement = document.createElement('style');
+            styleElement.innerHTML = styles;
+            document.body.appendChild(styleElement);
+
+
         }
 
         function editSelectImageModalButton() {
@@ -139,10 +172,10 @@
 
                 if (!fitImageIntoPreview) {
                     const imageSelectStyles = `
-                         .main_image {
+                        .main_image {
                             background-size: contain !important;
                         }
-                        `;
+                    `;
 
                     let styleElement = document.createElement('style');
                     styleElement.innerHTML = imageSelectStyles;
@@ -170,25 +203,25 @@
             });
         }
 
-        function editGeneModalArrangement() {
+        function editGenePreviewArrangement() {
             const geneStyles = `
-                #select_gene_modal .gene-preview-container { 
-                    display:flex !important; 
-                    flex-wrap: wrap; 
-                    justify-content: space-between;
-                    max-width: none !important;
-                    }
-                #select_gene_modal .usergene {
-                    width:49%; 
-                    margin: 4px 3px;
-                }
-                #select_gene_modal .usergene .usergene-info-row {
-                    width: auto;
-                }
-                #select_gene_modal .usergene .usergene-info-row * {
-                    margin:0; 
-                }
-                `;
+            .gene-preview-container,.usergene-container { 
+                display:flex !important; 
+                flex-wrap: wrap; 
+                justify-content: space-between;
+                max-width: none !important;
+            }
+            .usergene {
+                width:49%; 
+                margin: 4px 3px;
+            }
+            .usergene .usergene-info-row {
+                width: auto;
+            }
+            .usergene .usergene-info-row * {
+                margin:0; 
+            }
+            `;
 
             let styleElement = document.createElement('style');
             styleElement.innerHTML = geneStyles;
