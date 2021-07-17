@@ -40,6 +40,24 @@
         body {
             background: #999999;
         }
+        
+        .edits-icon-copy {
+            padding:5px;
+            background-color: rgba(255,255,255,0.3);
+            position: absolute;
+            top: 0;
+            right: 0;
+            display:none;
+            cursor: copy;
+        }
+        
+        .edits-icon-copy:hover {
+            display: block;
+        }
+        
+        .imglink:hover+.edits-icon-copy{
+            display: block;
+        }
     `;
 
     let styleElement = document.createElement('style');
@@ -66,6 +84,26 @@
         editGeneModalGeneHiding() // hide unwanted genes
         // Gene Containers
         editGeneContainers();
+        // Image Cards
+        window.setTimeout(editImageCard, 500); // Easy-Click Image Link Copy
+
+        function editImageCard() {
+            let imgLinks = document.querySelectorAll('.imglink');
+            [...imgLinks].forEach(imgLink => {
+                if (imgLink.querySelector('edits-icon-copy')) {
+                    return //imgLink already has a copy icon
+                }
+                const copyLinkIcon = document.createElement("i");
+                copyLinkIcon.classList.add('edits-icon-copy')
+                copyLinkIcon.innerHTML = "📋"
+                copyLinkIcon.onclick = (event) => {
+                    event.stopImmediatePropagation();
+                    console.log(imgLink.href)
+                    navigator.clipboard.writeText(imgLink.href)
+                }
+                imgLink.insertAdjacentElement("afterend", copyLinkIcon)
+            })
+        }
 
         function editProfilePage() {
             let profileUsername = document.querySelector(".profile_username");
@@ -147,6 +185,17 @@
                 submitFormBtn.innerHTML = "Enter"
                 submitFormBtn.type = "submit"
                 addImageUrlForm.insertAdjacentElement("beforeend", submitFormBtn)
+
+                //double click input box to paste and submit
+                addImageUrlForm.querySelector("input").addEventListener("dblclick", (event) => {
+                    navigator.clipboard.readText().then(
+                        clipText => {
+                            event.target.value = clipText
+                            submitFormBtn.click()
+                        }
+                    )
+                })
+
             }
         }
 
