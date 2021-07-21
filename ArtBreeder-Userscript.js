@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Art Breeder UI Edits
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.3
 // @description  Art Breeder UI Edits, July 2021
 // @author       codingcats
 // @include      *artbreeder.com*
@@ -13,7 +13,6 @@
     let myUsername = "codingcats7" //replace with your own username (case-sensitive)
     let waitToRunCode = 1000; //in milliseconds, to wait for page to load before script can edit it
     let geneContainerColor = "#B0C4DE" // lightsteelblue. helps see which gene controllers have been changed
-    let sliderBackgroundColor = "#4682B4" // steelblue. helps see which sliders have been changed
 
     let inputNumberStep = 0.005; //default is 0.1
     let childrenMutationSliderRange = [0, 1] // default is [0,1]
@@ -58,23 +57,63 @@
         .imglink:hover+.edits-icon-copy{
             display: block;
         }
+        
+        .edits-slider-input{
+            background-color: green !important;
+            -webkit-appearance: auto !important;
+            height : auto !important;
+            // max-width : 90% !important;
+        }
+        
+        .edits-num-input {
+            height : 20px !important;
+            max-width : 120px !important;
+            background-color : #d3d3d3 !important;
+            }
     `;
 
     let styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
     document.body.appendChild(styleElement);
 
+
+    fetchDetector()    //auto rerun when new resource loads
+
+    function fetchDetector() {
+        const observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                if (entry.initiatorType === "fetch") {
+                    console.log('Fetch request detected to', entry.name);
+                    if (entry.name === 'https://www.artbreeder.com/images' ||
+                        entry.name === "https://www.artbreeder.com/add_mix_parent" ||
+                        entry.name === "https://www.artbreeder.com/genome" ||
+                        entry.name === "https://www.artbreeder.com/image_children" ||
+                        entry.name === 'https://www.artbreeder.com/get_genes') {
+                        runEdits()
+                    }
+                }
+            }
+        });
+        observer.observe({
+            entryTypes: ["resource"]
+        });
+    }
+
+    let firstRun = true;
+
     function runEdits() {
 
-        // Profile Page
-        editProfilePage(); // shows New instead of Starred
-        // Gene Creation Page
-        editGeneCreationPage(); // shows negative image options, adds labels to layer slider
-        // Image Page
-        editImagePageChildrenTab() // Children tab
-        editImagePageCrossbreedTab() // Crossbreed tab - expands content and style sliders
-        //Animation Page
-        editAnimationPage()
+        if (firstRun) {
+            // Profile Page
+            editProfilePage(); // shows New instead of Starred
+            // Gene Creation Page
+            editGeneCreationPage(); // shows negative image options, adds labels to layer slider
+            // Image Page
+            editImagePageChildrenTab() // Children tab
+            editImagePageCrossbreedTab() // Crossbreed tab - expands content and style sliders
+            //Animation Page
+            editAnimationPage()
+        }
 
         // Selecting Images
         editSelectImageModalButton() // adds an "Enter" button to submit URL input
@@ -85,7 +124,63 @@
         // Gene Containers
         editGeneContainers();
         // Image Cards
-        window.setTimeout(editImageCard, 500); // Easy-Click Image Link Copy
+        // editMultiTag() // TODO
+        editImageCard()// Easy-Click Image Link Copy
+        //other
+        editSliderMarkers()
+
+        firstRun = false
+
+        function editSliderMarkers() {
+            let sliders = document.querySelectorAll('.slider input[type="range"]');
+            [...sliders].forEach((slider) => {
+
+                if (slider.getAttribute('list') === 'edits-datalist') {
+                    return
+                }
+
+                let datalistId = Date.now() + '' + Math.random()
+                let sliderMin = parseFloat(slider.min)
+                let sliderMax = parseFloat(slider.max)
+
+                slider.setAttribute('list', 'edits-datalist-' + datalistId)
+                slider.classList.add('edits-slider-input')
+
+                const dataListElement = document.createElement("datalist");
+                dataListElement.id = "edits-datalist-" + datalistId
+                dataListElement.style.display = 'none'
+
+                let scalePartitions = true
+                if (scalePartitions) {
+                    let partition = (Math.abs(sliderMax) + Math.abs(sliderMin)) / 4
+                    for (let i = sliderMin; i <= sliderMax; i += partition) {
+                        let option = document.createElement("option");
+                        option.value = i
+                        dataListElement.insertAdjacentElement("beforeend", option)
+                    }
+                } else {
+                    for (let i = sliderMin; i <= sliderMax; i += 0.5) {
+                        let option = document.createElement("option");
+                        option.value = i
+                        dataListElement.insertAdjacentElement("beforeend", option)
+                    }
+                }
+
+                slider.insertAdjacentElement("afterend", dataListElement)
+
+            })
+        }
+
+        function editMultiTag() {
+            let tagBtns = document.querySelectorAll(".tag-button")
+            if (tagBtns && !document.querySelector('.edits-tag-input')) {
+                let logo = document.querySelector('.header .logo')
+
+                const inputElement = document.createElement("input");
+                inputElement.classList.add('edits-tag-input')
+                logo.insertAdjacentElement("afterend", inputElement)
+            }
+        }
 
         function editImageCard() {
             let imgLinks = document.querySelectorAll('.imglink');
@@ -122,11 +217,14 @@
             let geneLayerSlider = document.querySelector('#wlatent-slider');
             if (geneLayerSlider) {
                 let sliderThumbs = geneLayerSlider.querySelectorAll('.noUi-handle');
-                geneLayerSlider.addEventListener('mousemove', () => {
-                    [...sliderThumbs].forEach((sliderThumb) => {
-                        sliderThumb.innerHTML = Math.round(sliderThumb.ariaValueNow)
+                if (geneLayerSlider.getAttribute('edits-listener') !== 'true') {
+                    geneLayerSlider.addEventListener('mousemove', () => {
+                        geneLayerSlider.setAttribute('edits-listener', 'true');
+                        [...sliderThumbs].forEach((sliderThumb) => {
+                            sliderThumb.innerHTML = Math.round(sliderThumb.ariaValueNow)
+                        })
                     })
-                })
+                }
             }
         }
 
@@ -187,14 +285,17 @@
                 addImageUrlForm.insertAdjacentElement("beforeend", submitFormBtn)
 
                 //double click input box to paste and submit
-                addImageUrlForm.querySelector("input").addEventListener("dblclick", (event) => {
-                    navigator.clipboard.readText().then(
-                        clipText => {
-                            event.target.value = clipText
-                            submitFormBtn.click()
-                        }
-                    )
-                })
+                if (addImageUrlForm.getAttribute('edits-listener') !== 'true') {
+                    addImageUrlForm.setAttribute('edits-listener', 'true');
+                    addImageUrlForm.querySelector("input").addEventListener("dblclick", (event) => {
+                        navigator.clipboard.readText().then(
+                            clipText => {
+                                event.target.value = clipText
+                                submitFormBtn.click()
+                            }
+                        )
+                    })
+                }
 
             }
         }
@@ -324,9 +425,8 @@
             ele.step = "any";
             ele.min = Math.min(range[0], ele.value);
             ele.max = Math.max(range[1], ele.value);
-            ele.style.height = "6px";
-            ele.style.maxWidth = "90%";
-            ele.style.backgroundColor = sliderBackgroundColor;
+            ele.classList.add('edits-slider-input')
+            ele.classList.remove('edits-num-input')
         }
 
         function makeInputNumEdit(ele) {
@@ -334,9 +434,8 @@
             ele.step = inputNumberStep;
             ele.min = -1000;
             ele.max = 1000;
-            ele.style.height = "20px";
-            ele.style.maxWidth = "120px";
-            ele.style.backgroundColor = '#d3d3d3';
+            ele.classList.add('edits-num-input')
+            ele.classList.remove('edits-slider-input')
         }
     }
 
@@ -344,4 +443,3 @@
 
 
 })();
-
