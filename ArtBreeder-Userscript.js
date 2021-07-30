@@ -14,9 +14,9 @@
     let waitToRunCode = 1000; //in milliseconds, to wait for page to load before script can edit it
     let geneContainerColor = "#B0C4DE" // lightsteelblue. helps see which gene controllers have been changed
 
-    let inputNumberStep = 0.005; //default is 0.1
+    let inputNumberStep = 0.01; //default is 0.1
     let childrenMutationSliderRange = [0, 1] // default is [0,1]
-    let xbreed_range = [-1, 2] // default is [0,1]
+    let xbreed_range = [-0.50, 1.50] // default is [0,1]
     let geneSliderRange = [-3, 3] //defaults vary by model. note: negative values will break general model
     let additionalSliderRange = 1 //amount to expand slider range by manually
 
@@ -45,7 +45,7 @@
             background-color: rgba(255,255,255,0.3);
             position: absolute;
             top: 0;
-            right: 0;
+            left: 0;
             display:none;
             cursor: copy;
         }
@@ -128,6 +128,7 @@
         editImageCard()// Easy-Click Image Link Copy
         //other
         editSliderMarkers()
+        editComposePage()
 
         firstRun = false
 
@@ -243,6 +244,13 @@
                 makeSliderEdit(slider, xbreed_range)
                 enableInputTypeToggle(slider, xbreed_range);
                 enableExpandSliderRange(slider)
+            });
+        }
+
+        function editComposePage() {
+            let composeSliders = document.querySelectorAll(".mix_attributes input");
+            [...composeSliders].forEach((slider) => {
+                enableInputTypeToggle(slider, [0,1]);
             });
         }
 
