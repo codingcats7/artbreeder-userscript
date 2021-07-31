@@ -69,7 +69,14 @@
             height : 20px !important;
             max-width : 120px !important;
             background-color : #d3d3d3 !important;
-            }
+        }
+            
+        .mix_attributes .edits-num-input {
+            width: calc(100% - 8px) !important;
+            margin: 4px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+        }
     `;
 
     const stylesAnimationPage = `
@@ -262,10 +269,26 @@
 
         function editImagePageCrossbreedTab() {
             let xbreedSliders = document.querySelectorAll("#mix_slider input");
+            // TODO lock sliders functionality
+            // if (xbreedSliders.length > 0) {
+            //     const lockInputsDiv = document.createElement("div");
+            //     const lockInputsLabel = document.createElement("label");
+            //     lockInputsLabel.htmlFor = "edits-lock-inputs"
+            //     lockInputsLabel.innerHTML = "Lock Inputs"
+            //     const lockInputs = document.createElement("input");
+            //     lockInputs.id = "edits-lock-inputs"
+            //     lockInputs.type = "checkbox"
+            //     lockInputs.name = "Lock Inputs"
+            //     lockInputs.value = "unlocked"
+            //     lockInputsDiv.appendChild(lockInputs)
+            //     lockInputsDiv.appendChild(lockInputsLabel)
+            //     xbreedSliders[xbreedSliders.length - 1].parentNode.insertAdjacentElement("afterend", lockInputsDiv)
+            // }
             [...xbreedSliders].forEach((slider) => {
                 makeSliderEdit(slider, xbreed_range)
                 enableInputTypeToggle(slider, xbreed_range);
                 enableExpandSliderRange(slider)
+
             });
         }
 
