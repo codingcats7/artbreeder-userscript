@@ -72,6 +72,24 @@
             }
     `;
 
+    const stylesAnimationPage = `
+        #preview .images img{
+            width: 40vh;
+            height: auto;
+        }
+        .flex_column {
+            padding: 0;
+        }
+        .flex_row {
+            flex-wrap: nowrap;
+        }
+        #timeline_container {
+            margin-top: 10px;
+            position: absolute;
+        }
+       
+    `;
+
     let styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
     document.body.appendChild(styleElement);
@@ -124,7 +142,7 @@
         // Gene Containers
         editGeneContainers();
         // Image Cards
-        // editMultiTag() // TODO
+        editTagFromClipboard()
         editImageCard()// Easy-Click Image Link Copy
         //other
         editSliderMarkers()
@@ -172,21 +190,25 @@
             })
         }
 
-        function editMultiTag() {
-            let tagBtns = document.querySelectorAll(".tag-button")
-            if (tagBtns && !document.querySelector('.edits-tag-input')) {
-                let logo = document.querySelector('.header .logo')
-
-                const inputElement = document.createElement("input");
-                inputElement.classList.add('edits-tag-input')
-                logo.insertAdjacentElement("afterend", inputElement)
+        function editTagFromClipboard() {
+            let tagInput = document.querySelector('#image-tag-popup input');
+            if (tagInput && tagInput.getAttribute('edits-listener') !== 'true') {
+                tagInput.setAttribute('edits-listener', 'true');
+                tagInput.addEventListener('dblclick', (eve) => {
+                    navigator.clipboard.readText().then(
+                        clipText => {
+                            document.querySelector('#image-tag-popup input').value = clipText;
+                            document.querySelector('#image-tag-popup form').requestSubmit()
+                        }
+                    )
+                })
             }
         }
 
         function editImageCard() {
             let imgLinks = document.querySelectorAll('.imglink');
             [...imgLinks].forEach(imgLink => {
-                if (imgLink.querySelector('edits-icon-copy')) {
+                if (imgLink.parentNode.querySelector('edits-icon-copy')) {
                     return //imgLink already has a copy icon
                 }
                 const copyLinkIcon = document.createElement("i");
@@ -250,7 +272,7 @@
         function editComposePage() {
             let composeSliders = document.querySelectorAll(".mix_attributes input");
             [...composeSliders].forEach((slider) => {
-                enableInputTypeToggle(slider, [0,1]);
+                enableInputTypeToggle(slider, [0, 1]);
             });
         }
 
@@ -258,27 +280,9 @@
             if (!document.URL.includes("video")) {
                 return
             }
-            const styles = `
-                #preview .images img{
-                    width: 50vh;
-                    max-width: 60vw;
-                    height: auto;
-                }
-                .flex_column {
-                    padding: 0;
-                }
-                .flex_row {
-                    flex-wrap: nowrap;
-                }
-                #timeline_container {
-                    margin-top: 10px;
-                    position: absolute;
-                }
-               
-            `;
 
             let styleElement = document.createElement('style');
-            styleElement.innerHTML = styles;
+            styleElement.innerHTML = stylesAnimationPage;
             document.body.appendChild(styleElement);
 
 
