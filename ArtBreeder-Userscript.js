@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Art Breeder UI Edits
 // @namespace    http://tampermonkey.net/
-// @version      2.3
-// @description  Art Breeder UI Edits, July 2021
+// @version      2.4
+// @description  Art Breeder UI Edits
 // @author       codingcats
 // @include      *artbreeder.com*
 // ==/UserScript==
@@ -246,15 +246,19 @@
 
             let geneLayerSlider = document.querySelector('#wlatent-slider');
             if (geneLayerSlider) {
-                let sliderThumbs = geneLayerSlider.querySelectorAll('.noUi-handle');
-                if (geneLayerSlider.getAttribute('edits-listener') !== 'true') {
-                    geneLayerSlider.addEventListener('mousemove', () => {
-                        geneLayerSlider.setAttribute('edits-listener', 'true');
-                        [...sliderThumbs].forEach((sliderThumb) => {
-                            sliderThumb.innerHTML = Math.round(sliderThumb.ariaValueNow)
-                        })
-                    })
-                }
+                geneLayerSlider.noUiSlider.updateOptions({
+                    margin: 0, //enable sliders to overlap to make single layer gene
+                    tooltips: [true, true],
+                    format: { //get rid of decimals
+                        to: function (value) {
+                            return value.toString().split('.')[0]
+                        }
+                        ,
+                        from: function (v) {
+                            return v
+                        }
+                    }
+                });
             }
         }
 
